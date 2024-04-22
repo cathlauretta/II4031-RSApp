@@ -1,16 +1,23 @@
 "use client";
 import Image from "next/image";
 import { TextBubble, FileBubble } from "./ChatBubble";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { generateKeys, encryption, encodeBase64 } from "@/utils/rsa";
 
 interface Message {
   name: string;
-  txt?: string;
+  txt?: number[];
   file?: File;
   filename?: string;
 }
 
 const ChatWindow = () => {
+  const [keys, setKeys] = useState<bigint[]>([]);
+  useEffect(() => {
+    const keys: bigint[] = generateKeys();
+    setKeys(keys);
+  }, []);
+
   const name1 = "Kim Possible";
   const name2 = "Kanye East";
 
@@ -40,7 +47,7 @@ const ChatWindow = () => {
       fileInputRef2.current && fileInputRef2.current.click();
     }
   };
-  const handleFileChange = (
+  const handleFileSend = (
     e: React.ChangeEvent<HTMLInputElement>,
     id: number
   ) => {
@@ -70,18 +77,38 @@ const ChatWindow = () => {
     if (id === 1) {
       const newMsg: Message = {
         name: name1,
-        txt: txtInput1,
+        txt: encryption(txtInput1, keys[0], keys[2]),
       };
       setMessages([...messages, newMsg]);
       setTxtInput1("");
     } else {
       const newMsg: Message = {
         name: name2,
-        txt: txtInput2,
+        txt: encryption(txtInput2, keys[0], keys[2]),
       };
       setMessages([...messages, newMsg]);
       setTxtInput2("");
     }
+  };
+
+  const downloadKey = (resultText: String, fileName: string): void => {
+    const link = document.createElement("a");
+    const output = [];
+    for (let i = 0; i < resultText.length; i++) {
+      output.push(resultText.charCodeAt(i));
+    }
+
+    const blob = new Blob([new Uint8Array(output)]);
+    link.href = URL.createObjectURL(blob);
+    // console.log(fileName);
+
+    if (fileName === "") {
+      link.download = "key.txt";
+    } else {
+      link.download = fileName;
+    }
+
+    link.click();
   };
 
   return (
@@ -102,12 +129,18 @@ const ChatWindow = () => {
             <div className="text-xl font-bold">{name1}</div>
             <div className="text-sm italic">
               <text>Online</text>
-              <button type="button" className="group pl-2">
+              <button
+                type="button"
+                onClick={() => downloadKey(String(keys[0]), "*.pub")}
+                className="group pl-2">
                 <text className="italic invisible group-hover:visible group-hover:text-gray-400">
                   Download Pub
                 </text>
               </button>
-              <button type="button" className="group pl-2">
+              <button
+                type="button"
+                onClick={() => downloadKey(String(keys[1]), "*.pri")}
+                className="group pl-2">
                 <text className="italic invisible group-hover:visible group-hover:text-gray-400">
                   Download Pri
                 </text>
@@ -125,6 +158,7 @@ const ChatWindow = () => {
                   isRight={message.name === name1}
                   ct={message.txt}
                   user={message.name}
+                  keys={keys}
                 />
               )}
               {message.file && message.filename && (
@@ -167,7 +201,7 @@ const ChatWindow = () => {
                 id="files1"
                 type="file"
                 ref={fileInputRef1}
-                onChange={(e) => handleFileChange(e, 1)}
+                onChange={(e) => handleFileSend(e, 1)}
                 className="hidden"
               />
             </>
@@ -242,6 +276,7 @@ const ChatWindow = () => {
                   isRight={message.name === name2}
                   ct={message.txt}
                   user={message.name}
+                  keys={keys}
                 />
               )}
               {message.file && message.filename && (
@@ -284,7 +319,7 @@ const ChatWindow = () => {
                 id="files2"
                 type="file"
                 ref={fileInputRef2}
-                onChange={(e) => handleFileChange(e, 2)}
+                onChange={(e) => handleFileSend(e, 2)}
                 className="hidden"
               />
             </>

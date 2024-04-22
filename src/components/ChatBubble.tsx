@@ -1,15 +1,40 @@
 "use client";
+import { decryption, encodeBase64 } from "@/utils/rsa";
 import Image from "next/image";
 
 export const TextBubble = ({
   ct,
   isRight,
   user,
+  keys,
 }: {
-  ct: string;
+  ct: number[];
   isRight: boolean;
   user: string;
+  keys: bigint[];
 }) => {
+  const pt = decryption(ct, keys[1], keys[2]);
+
+  const downloadFile = (resultText: String, fileName: string): void => {
+    const link = document.createElement("a");
+    const output = [];
+    for (let i = 0; i < resultText.length; i++) {
+      output.push(resultText.charCodeAt(i));
+    }
+
+    const blob = new Blob([new Uint8Array(output)]);
+    link.href = URL.createObjectURL(blob);
+    // console.log(fileName);
+
+    if (fileName === "") {
+      link.download = "result.txt";
+    } else {
+      link.download = "result_" + fileName;
+    }
+
+    link.click();
+  };
+
   return (
     <div
       className={
@@ -29,6 +54,7 @@ export const TextBubble = ({
         <div className="pb-2 text-gray-400">
           <button
             type="button"
+            onClick={() => downloadFile(encodeBase64(ct), user + "_cipher.txt")}
             className="flex gap-1 items-center hover:text-black hover:underline hover:font-medium">
             <text className="italic">Ciphertext</text>
             <svg
@@ -49,12 +75,13 @@ export const TextBubble = ({
             </svg>
           </button>
           <div id="cipher" className="w-fit max-w-xl break-words">
-            {ct}
+            {encodeBase64(ct)}
           </div>
         </div>
         <div className="pt-2 text-black">
           <button
             type="button"
+            onClick={() => downloadFile(pt, user + "_plain.txt")}
             className="flex gap-1 items-center hover:underline">
             <text className="italic font-semibold">Plaintext</text>
             <svg
@@ -74,7 +101,7 @@ export const TextBubble = ({
               />
             </svg>
           </button>
-          <div id="message">nah gitu dong ada adatnya dikit kalo nyapa</div>
+          <div id="message">{pt}</div>
         </div>
       </div>
     </div>
