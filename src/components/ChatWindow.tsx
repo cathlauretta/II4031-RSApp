@@ -12,10 +12,16 @@ interface Message {
 }
 
 const ChatWindow = () => {
-  const [keys, setKeys] = useState<bigint[]>([]);
+  const [keysKanye, setKeysKanye] = useState<bigint[]>([]);
   useEffect(() => {
     const keys: bigint[] = generateKeys();
-    setKeys(keys);
+    setKeysKanye(keys);
+  }, []);
+
+  const [keysKim, setKeysKim] = useState<bigint[]>([]);
+  useEffect(() => {
+    const keys: bigint[] = generateKeys();
+    setKeysKim(keys);
   }, []);
 
   const name1 = "Kim Possible";
@@ -77,14 +83,14 @@ const ChatWindow = () => {
     if (id === 1) {
       const newMsg: Message = {
         name: name1,
-        txt: encryption(txtInput1, keys[0], keys[2]),
+        txt: encryption(txtInput1, keysKim[0], keysKim[2]),
       };
       setMessages([...messages, newMsg]);
       setTxtInput1("");
     } else {
       const newMsg: Message = {
         name: name2,
-        txt: encryption(txtInput2, keys[0], keys[2]),
+        txt: encryption(txtInput2, keysKanye[0], keysKanye[2]),
       };
       setMessages([...messages, newMsg]);
       setTxtInput2("");
@@ -131,18 +137,18 @@ const ChatWindow = () => {
               <text>Online</text>
               <button
                 type="button"
-                onClick={() => downloadKey(String(keys[0]), "*.pub")}
+                onClick={() => downloadKey(String(keysKim[0]), "*.pub")}
                 className="group pl-2">
                 <text className="italic invisible group-hover:visible group-hover:text-gray-400">
-                  Download Pub
+                  Kim's Pub
                 </text>
               </button>
               <button
                 type="button"
-                onClick={() => downloadKey(String(keys[1]), "*.pri")}
+                onClick={() => downloadKey(String(keysKim[1]), "*.pri")}
                 className="group pl-2">
                 <text className="italic invisible group-hover:visible group-hover:text-gray-400">
-                  Download Pri
+                  Kim's Pri
                 </text>
               </button>
             </div>
@@ -158,7 +164,7 @@ const ChatWindow = () => {
                   isRight={message.name === name1}
                   ct={message.txt}
                   user={message.name}
-                  keys={keys}
+                  keys={message.name === "Kim Possible" ? keysKim : keysKanye}
                 />
               )}
               {message.file && message.filename && (
@@ -253,14 +259,14 @@ const ChatWindow = () => {
             <div className="text-xl font-bold">{name2}</div>
             <div className="text-sm italic">
               <text>Online</text>
-              <button type="button" className="group pl-2">
+              <button type="button" onClick={() => downloadKey(String(keysKanye[0]), "*.pub")} className="group pl-2">
                 <text className="italic invisible group-hover:visible group-hover:text-gray-400">
-                  Download Pub
+                  Kanye's Pub
                 </text>
               </button>
-              <button type="button" className="group pl-2">
+              <button type="button" onClick={() => downloadKey(String(keysKanye[1]), "*.pri")} className="group pl-2">
                 <text className="italic invisible group-hover:visible group-hover:text-gray-400">
-                  Download Pri
+                  Kanye's Pri
                 </text>
               </button>
             </div>
@@ -276,7 +282,7 @@ const ChatWindow = () => {
                   isRight={message.name === name2}
                   ct={message.txt}
                   user={message.name}
-                  keys={keys}
+                  keys={message.name === "Kim Possible" ? keysKim : keysKanye}
                 />
               )}
               {message.file && message.filename && (
