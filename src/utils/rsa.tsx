@@ -56,7 +56,7 @@ function encrypt(message: bigint[], key: [bigint, bigint]): bigint[] {
     return encryptedMessage;
 }
 
-const encodeBase64 = (data: any) => {
+export const encodeBase64 = (data: any) => {
     return Buffer.from(data).toString("base64");
 };
 
@@ -181,21 +181,22 @@ export function decryption(arrInt: number[], d: bigint, n: bigint): string {
     const cipher = numberToBigInt(arrInt);
     const decryptedResult = encrypt(cipher, [d, n]);
     const result = bigIntToNumber(decryptedResult);
+    console.log(result);
     const base64result = integerArrayToBase64String(result);
     const message = decodeBase64(base64result);
 
     return message;
 }
 
-const generator = generateKeys();
-const e = generator[0];
-const d = generator[1];
-const n = generator[2];
+// const generator = generateKeys();
+// const e = generator[0];
+// const d = generator[1];
+// const n = generator[2];
 
-const message = "Hello World!";
-const encRes = encryption(message, e, n);
-const messageBase64 = encodeBase64(encRes);
-console.log(`The base64 encrypted message is: ${messageBase64}`);
+// const message = "Hello World!";
+// const encRes = encryption(message, e, n);
+// const messageBase64 = encodeBase64(encRes);
+// console.log(`The base64 encrypted message is: ${messageBase64}`);
 
-const decRes = decryption(encRes, d, n);
-console.log(`The decrypted message is: ${decRes}`);
+// const decRes = decryption(encRes, d, n);
+// console.log(`The decrypted message is: ${decRes}`);
