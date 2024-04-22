@@ -145,13 +145,6 @@ function bigIntToNumber(bigInts: bigint[]): number[] {
     return numbers;
 }
 
-const plaintext = "Hello World!";
-const base64plaintext = (encodeBase64(plaintext));
-console.log(`The plaintext is: ${plaintext}`);
-console.log(`The base64 plaintext is: ${base64plaintext}`);
-const base64int = (base64StringToIntegerArray(base64plaintext));
-console.log(`The base64 plaintext to integer is: ${base64int}`);
-
 // const intString = (integerArrayToString(base64int));
 // console.log(`The integer to String is: ${intString}`);
 // const stringInt = (stringToIntegerArray(intString));
@@ -162,25 +155,47 @@ console.log(`The base64 plaintext to integer is: ${base64int}`);
 // const decode_base64 = (decodeBase64(base64cipher));
 // console.log(`The decoded message is: ${decode_base64}`);
 
-const p = BigInt(47);
-const q = BigInt(71);
-const n = p * q;
-const totient = (p - BigInt(1)) * (q - BigInt(1));
+export function generateKeys(): bigint[] {
+    const p = BigInt(47);
+    const q = BigInt(71);
+    const n = p * q;
+    const totient = (p - BigInt(1)) * (q - BigInt(1));
+    
+    const e = chooseE(totient);
+    const d = searchD(e, totient);
 
-const e = chooseE(totient);
-console.log(`The public key is: (${e}, ${n})`);
+    return [e, d, n];
+}
 
-const d = searchD(e, totient);
-console.log(`The private key is: (${d}, ${n})`);
+export function encryption(text: string, e: bigint, n: bigint): number[] {
+    const base64_text = (encodeBase64(text));
+    const base64_int = (base64StringToIntegerArray(base64_text));
+    const message = numberToBigInt(base64_int);
+    const encryptedResult = encrypt(message, [e, n]);
+    const encryptedInt = bigIntToNumber(encryptedResult);
 
-const message = numberToBigInt(base64int);
-console.log(`INI PESAN: ${message}`);
-const encryptedResult = encrypt(message, [e, n]);
-console.log(`The encrypted result is: ${encryptedResult}`);
+    return encryptedInt;
+}
 
-const decryptedResult = encrypt(encryptedResult, [d, n]);
-console.log(`The decrypted result is: ${decryptedResult}`);
-const messageRes = bigIntToNumber(decryptedResult);
-const base64result = integerArrayToBase64String(messageRes);
-const result = decodeBase64(base64result);
-console.log(`The decrypted message is: ${result}`);
+export function decryption(arrInt: number[], d: bigint, n: bigint): string {
+    const cipher = numberToBigInt(arrInt);
+    const decryptedResult = encrypt(cipher, [d, n]);
+    const result = bigIntToNumber(decryptedResult);
+    const base64result = integerArrayToBase64String(result);
+    const message = decodeBase64(base64result);
+
+    return message;
+}
+
+const generator = generateKeys();
+const e = generator[0];
+const d = generator[1];
+const n = generator[2];
+
+const message = "Hello World!";
+const encRes = encryption(message, e, n);
+const messageBase64 = encodeBase64(encRes);
+console.log(`The base64 encrypted message is: ${messageBase64}`);
+
+const decRes = decryption(encRes, d, n);
+console.log(`The decrypted message is: ${decRes}`);
