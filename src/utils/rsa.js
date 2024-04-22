@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.decryption = exports.encryption = exports.generateKeys = void 0;
 function randomBigIntFromInterval(min, max) {
     var range = max - min + BigInt(1);
     var randomNumber = BigInt(Math.floor(Number(range) * Math.random()));
@@ -121,12 +124,6 @@ function bigIntToNumber(bigInts) {
     }
     return numbers;
 }
-var plaintext = "Hello World!";
-var base64plaintext = (encodeBase64(plaintext));
-console.log("The plaintext is: ".concat(plaintext));
-console.log("The base64 plaintext is: ".concat(base64plaintext));
-var base64int = (base64StringToIntegerArray(base64plaintext));
-console.log("The base64 plaintext to integer is: ".concat(base64int));
 // const intString = (integerArrayToString(base64int));
 // console.log(`The integer to String is: ${intString}`);
 // const stringInt = (stringToIntegerArray(intString));
@@ -135,21 +132,41 @@ console.log("The base64 plaintext to integer is: ".concat(base64int));
 // console.log(`The decoded base64 message is: ${base64cipher}`);
 // const decode_base64 = (decodeBase64(base64cipher));
 // console.log(`The decoded message is: ${decode_base64}`);
-var p = BigInt(47);
-var q = BigInt(71);
-var n = p * q;
-var totient = (p - BigInt(1)) * (q - BigInt(1));
-var e = chooseE(totient);
-console.log("The public key is: (".concat(e, ", ").concat(n, ")"));
-var d = searchD(e, totient);
-console.log("The private key is: (".concat(d, ", ").concat(n, ")"));
-var message = numberToBigInt(base64int);
-console.log("INI PESAN: ".concat(message));
-var encryptedResult = encrypt(message, [e, n]);
-console.log("The encrypted result is: ".concat(encryptedResult));
-var decryptedResult = encrypt(encryptedResult, [d, n]);
-console.log("The decrypted result is: ".concat(decryptedResult));
-var messageRes = bigIntToNumber(decryptedResult);
-var base64result = integerArrayToBase64String(messageRes);
-var result = decodeBase64(base64result);
-console.log("The decrypted message is: ".concat(result));
+function generateKeys() {
+    var p = BigInt(47);
+    var q = BigInt(71);
+    var n = p * q;
+    var totient = (p - BigInt(1)) * (q - BigInt(1));
+    var e = chooseE(totient);
+    var d = searchD(e, totient);
+    return [e, d, n];
+}
+exports.generateKeys = generateKeys;
+function encryption(text, e, n) {
+    var base64_text = (encodeBase64(text));
+    var base64_int = (base64StringToIntegerArray(base64_text));
+    var message = numberToBigInt(base64_int);
+    var encryptedResult = encrypt(message, [e, n]);
+    var encryptedInt = bigIntToNumber(encryptedResult);
+    return encryptedInt;
+}
+exports.encryption = encryption;
+function decryption(arrInt, d, n) {
+    var cipher = numberToBigInt(arrInt);
+    var decryptedResult = encrypt(cipher, [d, n]);
+    var result = bigIntToNumber(decryptedResult);
+    var base64result = integerArrayToBase64String(result);
+    var message = decodeBase64(base64result);
+    return message;
+}
+exports.decryption = decryption;
+var generator = generateKeys();
+var e = generator[0];
+var d = generator[1];
+var n = generator[2];
+var message = "Hello World!";
+var encRes = encryption(message, e, n);
+var messageBase64 = encodeBase64(encRes);
+console.log("The base64 encrypted message is: ".concat(messageBase64));
+var decRes = decryption(encRes, d, n);
+console.log("The decrypted message is: ".concat(decRes));
