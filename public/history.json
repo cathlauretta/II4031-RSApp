@@ -1,0 +1,20 @@
+{
+    "participants": ["user1", "user2"],
+    "messages": [
+      {
+        "timestamp": "2024-04-22T10:00:00",
+        "sender": "user1",
+        "message": "Hey, how's it going?"
+      },
+      {
+        "timestamp": "2024-04-22T10:05:00",
+        "sender": "user2",
+        "message": "I'm good, thanks! How about you?"
+      },
+      {
+        "timestamp": "2024-04-22T10:10:00",
+        "sender": "user1",
+        "message": "I'm doing well too. Just catching up on some work."
+      }
+    ]
+  }
